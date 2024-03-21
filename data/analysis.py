@@ -15,7 +15,7 @@ def get_publications_dict(domain):
     return pub_dict
 
 def bar_plot(data_dict, xlabel, ylabel, title, save_fig):
-    plt.bar(pub_dict.keys(), pub_dict.values())
+    plt.bar(data_dict.keys(), data_dict.values())
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     plt.title(title)
@@ -30,7 +30,7 @@ for d in domains:
     pub_dict = get_publications_dict(d)
     
     print(f'Publication dict for {d}:', pub_dict)
-    bar_plot(pub_dict, 'Publications', 'Number of Articles', 'Distribution of Articles per Publication', f'{d}_distribution.png')
+    bar_plot(pub_dict, 'Publications', 'Number of Articles', f'Distribution of Articles per Publication ({d})', f'{d}_distribution.png')
     
     domain_dict[d] = sum(pub_dict.values())
 
