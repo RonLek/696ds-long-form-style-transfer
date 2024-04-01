@@ -33,7 +33,7 @@ def get_text_length_distribution(domain):
 
     # Plotting
     plt.bar(bin_edges[:-1], hist, width=100)  # Use width=10 to match bin width
-    plt.title('Distribution of Text Lengths')
+    plt.title(f'Distribution of Text Lengths for {domain}')
     plt.xlabel('Text Length')
     plt.ylabel('Frequency')
     plt.grid(True)
