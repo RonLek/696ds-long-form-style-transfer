@@ -33,7 +33,7 @@ class StyleTransfer:
         # Few-shot
         few_shot_result = ""
         if num_references:
-            reference_docs = self.publications_df.loc[self.publications_df['Publication_name'] == publication_name, 'reference_doc'].iloc[:num_references]
+            reference_docs = self.publications_df.loc[self.publications_df['Publication_name'] == publication_name, 'reference_doc'].sample(n=num_references)
             few_shot_result = perform_few_shot(source_doc, reference_docs, publication_name)
         
         # Self-discover
@@ -92,7 +92,7 @@ class StyleTransfer:
             self.paired_df.at[index, 'SelfDiscover_output'] = self_discover_result
 
     def save_output_csv(self):
-        output_file = "output.csv"
+        output_file = "output_finance.csv"
         self.paired_df.to_csv(output_file, index=False)
         print(f"Output CSV file saved: {output_file}")
 
