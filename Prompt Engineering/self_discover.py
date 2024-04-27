@@ -8,8 +8,6 @@ from openai import OpenAI
 load_dotenv()
 
 client = OpenAI()
-# client = OpenAI(api_key="local-generated-key", base_url="http://devnuc.lan:5000/v1")
-
 
 def query_llm(messages, temperature=0.1):
     # Retry forever
@@ -74,26 +72,13 @@ def execute_reasoning_structure(reasoning_structure, task_instance):
 # Example usage
 if __name__ == "__main__":
     reasoning_modules = [
-        "1. How could I devise an experiment to help solve that problem?",
-        "2. Make a list of ideas for solving this problem, and apply them one by one to the problem to see if any progress can be made.",
-        "3. How could I measure progress on this problem?",
         "4. How can I simplify the problem so that it is easier to solve?",
-        "5. What are the key assumptions underlying this problem?",
-        "7. What are the alternative perspectives or viewpoints on this problem?",
-        "8. What are the long-term implications of this problem and its solutions?",
         "9. How can I break down this problem into smaller, more manageable parts?",
         "10. Critical Thinking: This style involves analyzing the problem from different perspectives, questioning assumptions, and evaluating the evidence or information available. It focuses on logical reasoning, evidence-based decision-making, and identifying potential biases or flaws in thinking.",
         "11. Try creative thinking, generate innovative and out-of-the-box ideas to solve the problem. Explore unconventional solutions, thinking beyond traditional boundaries, and encouraging imagination and originality.",
         "13. Use systems thinking: Consider the problem as part of a larger system and understanding the interconnectedness of various elements. Focuses on identifying the underlying causes, feedback loops, and interdependencies that influence the problem, and developing holistic solutions that address the system as a whole.",
         "14. Use Risk Analysis: Evaluate potential risks, uncertainties, and tradeoffs associated with different solutions or approaches to a problem. Emphasize assessing the potential consequences and likelihood of success or failure, and making informed decisions based on a balanced analysis of risks and benefits.",
         "15. Use Reflective Thinking: Step back from the problem, take the time for introspection and self-reflection. Examine personal biases, assumptions, and mental models that may influence problem-solving, and being open to learning from past experiences to improve future approaches.",
-        "16. What is the core issue or problem that needs to be addressed?",
-        "17. What are the underlying causes or factors contributing to the problem?",
-        "19. What are the potential obstacles or challenges that might arise in solving this problem?",
-        "20. Are there any relevant data or information that can provide insights into the problem? If yes, what data sources are available, and how can they be analyzed?",
-        "21. Are there any stakeholders or individuals who are directly affected by the problem? What are their perspectives and needs?",
-        "23. How can progress or success in solving the problem be measured or evaluated?",
-        "24. What indicators or metrics can be used?",
         "25. Is the problem a technical or practical one that requires a specific expertise or skill set? Or is it more of a conceptual or theoretical problem?",
         "27. Is the problem related to human behavior, such as a social, cultural, or psychological issue?",
         "28. Does the problem involve decision-making or planning, where choices need to be made under uncertainty or with competing objectives?",
