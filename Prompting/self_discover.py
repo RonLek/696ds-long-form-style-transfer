@@ -8,22 +8,17 @@ load_dotenv()
 client = OpenAI()
 OPENROUTER_API_KEY = os.environ["OPENROUTER_API_KEY"]
 
-def run_self_discover(source_doc, reference_docs, publication_name, reasoning_modules):
-    reference_docs_str = "\n\n".join(reference_docs)
+def run_self_discover(source_doc, reference_doc, publication_name, reasoning_modules):
     task_description = f"You are an expert AI language model capable of performing style transfer from one document to another. Your task is to analyze the reference {publication_name}'s articles, identify key stylistic attributes, and then use those attributes to transfer the style of the reference document to the source document."
     task_instance = f''' To perform the style transfer, follow these steps:
 
-Analyze the reference documents and identify the key attributes that define the {publication_name}'s style.
-Internally imagine a comprehensive style guide based on the identified attributes, making it easy for you to parse and reference.
-Using the internal style guide you created, transfer the style of the reference document to the source document. Ensure that the resulting content consistently reflects the {publication_name}'s unique voice and style while preserving the original meaning and information of the source document.
-Provide only the complete style transfer result.
-
+Please rewrite the provided source document to match the writing style of the reference document from {publication_name} . First, analyze the reference document to identify and understand the key style attributes, such as:\n1. Overall document structure and organization\n2. Formality and tone of language\n3. Vocabulary, terminology, and jargon typical of the specific domain\n4. Sentence structure, length, and complexity\n5. Paragraph structure and length\n6. Grammatical and syntactical patterns\n7. Use of active vs. passive voice\n8. Perspective (e.g., first person, third person)\n9. Persuasive techniques and rhetorical devices employed\n10. Formatting elements like headings, bullets, emphasis\nAfter gaining a high-level understanding of these style attributes, list them out and apply them to the source document to effectively transfer the writing style. Aim to incorporate these attributes in a manner that maintains the coherence and logical flow of the source document's content.\nThe rewritten document should convincingly read as though it were written by the same author or publication as the reference document, while preserving the key informational content of the original source document. Please provide the full rewritten document.
 
 
 [SOURCE DOCUMENT]: 
 {source_doc}
 [REFERENCE DOCUMENT]:
-{reference_docs_str}
+{reference_doc}
 '''
     selected_modules = select_reasoning_modules(task_description, reasoning_modules)
     adapted_modules = adapt_reasoning_modules(selected_modules, task_instance)
