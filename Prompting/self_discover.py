@@ -9,26 +9,10 @@ client = OpenAI()
 OPENROUTER_API_KEY = os.environ["OPENROUTER_API_KEY"]
 
 def run_self_discover(source_doc, reference_doc, publication_name, reasoning_modules):
-    task_description = f"Your task is to create a comprehensive style guide for {publication_name} based on the provided reference {publication_name}'s articles. The style guide should serve as a detailed reference for writers, editors, and content creators to ensure consistency and adherence to the publication's unique voice and style."
+    task_description = f"You are an expert copywriter who can replicate the style of writing from one document to another. Your task is to create a comprehensive style guide for {publication_name} based on the provided reference {publication_name}'s articles. The style guide should serve as a detailed reference for writers, editors, and content creators to ensure consistency and adherence to the publication's unique voice and style."
     task_instance = f'''
-To create the style guide, carefully analyze the reference documents and identify the key attributes that define the {publication_name}'s style. Consider the following attributes as a starting point, but feel free to discard, modify, or add new attributes as necessary to accurately capture the {publication_name}'s style:
+To create the style guide, carefully analyze the reference documents and identify the key attributes that define the {publication_name}'s style. 
 
-1. "documentStructure": [Document structure and organization]
-2. "languageTone": [Language formality and tone]  
-3. "vocabulary": [Vocabulary, terminology, and jargon]
-4. "sentenceStructure": [Sentence structure, length, and complexity and formality]
-5. "paragraphStructure": [Paragraph structure and length]
-6. "grammarSyntax": [Grammar and syntax patterns]
-7. "voiceUsage": [Active vs. passive voice usage]
-8. "perspective": [Perspective (e.g., first person, third person)]
-9. "persuasiveTechniques": [Persuasive techniques and rhetorical devices]
-10. "formattingElements": [Formatting and visual elements]
-11. "targetAudience": [Target audience and purpose of the content]
-12. "inclusiveLanguage": [Preferred pronouns and inclusive language guidelines]
-13. "punctuationCapitalization": [Punctuation and capitalization rules]
-14. "citationStyle": [Acceptable sources and citation styles]
-15. "writingTips": [Any specific do's and don'ts for writers to keep in mind]
-..... add new attributes
 
 For each attribute, provide a brief description and relevant examples in an array. 
 Add new attributes as required by the reference document, the list isnt comprehensive.

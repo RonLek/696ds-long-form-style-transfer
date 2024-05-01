@@ -24,17 +24,21 @@ class StyleTransfer:
             self.publications_df = pd.read_csv(file_path)
             print(f"Publications CSV file selected: {file_path}")
 
-    def run_prompting(self, source_doc, publication_name, num_references=None):
+    def run_prompting(self, source_doc, publication_name, num_references=None, use_pairs=True, use_publication_name=True, use_reference_doc=False):
         reference_doc = self.publications_df.loc[self.publications_df['Publication_name'] == publication_name, 'reference_doc'].iloc[0]
         
         # Zero-shot
-        zero_shot_result = perform_zero_shot(source_doc, reference_doc, publication_name)
+        zero_shot_result = perform_zero_shot(source_doc, reference_doc, publication_name, use_publication_name, use_reference_doc)
         
         # Few-shot
         few_shot_result = ""
         if num_references:
-            reference_docs = self.publications_df.loc[self.publications_df['Publication_name'] == publication_name, 'reference_doc'].sample(n=num_references)
-            few_shot_result = perform_few_shot(source_doc, reference_docs, publication_name)
+            if use_pairs:
+                reference_pairs = self.paired_df.sample(n=num_references).apply(lambda x: {'source': x['paired_doc1'], 'reference': x['reference_doc']}, axis=1).tolist()
+                few_shot_result = perform_few_shot(source_doc, reference_pairs, publication_name, use_pairs=True)
+            else:
+                reference_docs = self.publications_df.loc[self.publications_df['Publication_name'] == publication_name, 'reference_doc'].sample(n=num_references)
+                few_shot_result = perform_few_shot(source_doc, reference_docs, publication_name)
         
         # Self-discover
         reasoning_modules = [
@@ -92,7 +96,7 @@ class StyleTransfer:
             self.paired_df.at[index, 'SelfDiscover_output'] = self_discover_result
 
     def save_output_csv(self):
-        output_file = "output_finance.csv"
+        output_file = "output_food.csv"
         self.paired_df.to_csv(output_file, index=False)
         print(f"Output CSV file saved: {output_file}")
 
