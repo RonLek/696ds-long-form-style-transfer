@@ -8,25 +8,22 @@ load_dotenv()
 client = OpenAI()
 OPENROUTER_API_KEY = os.environ["OPENROUTER_API_KEY"]
 
-def run_self_discover(source_doc, reference_doc, publication_name, reasoning_modules):
-    task_description = f"You are an expert copywriter who can replicate the style of writing from one document to another. Your task is to create a comprehensive style guide for {publication_name} based on the provided reference {publication_name}'s articles. The style guide should serve as a detailed reference for writers, editors, and content creators to ensure consistency and adherence to the publication's unique voice and style."
-    task_instance = f'''
-To create the style guide, carefully analyze the reference documents and identify the key attributes that define the {publication_name}'s style. 
+def run_self_discover(source_doc, reference_docs, publication_name, reasoning_modules):
+    reference_docs_str = "\n\n".join(reference_docs)
+    task_description = f"You are an expert AI language model capable of performing style transfer from one document to another. Your task is to analyze the reference {publication_name}'s articles, identify key stylistic attributes, and then use those attributes to transfer the style of the reference document to the source document."
+    task_instance = f''' To perform the style transfer, follow these steps:
+
+Analyze the reference documents and identify the key attributes that define the {publication_name}'s style.
+Internally imagine a comprehensive style guide based on the identified attributes, making it easy for you to parse and reference.
+Using the internal style guide you created, transfer the style of the reference document to the source document. Ensure that the resulting content consistently reflects the {publication_name}'s unique voice and style while preserving the original meaning and information of the source document.
+Provide only the complete style transfer result.
 
 
-For each attribute, provide a brief description and relevant examples in an array. 
-Add new attributes as required by the reference document, the list isnt comprehensive.
-
-Organize the style guide in JSON into a clear hierarchy, making it easy for LLM's to parse and reference.
-
-The final JSON style guide should be comprehensive, enabling LLM's to internalize {publication_name}'s unique style and consistently produce content that resonates with their target audience.
-
-Please provide the complete style guide in valid JSON format.
 
 [SOURCE DOCUMENT]: 
 {source_doc}
 [REFERENCE DOCUMENT]:
-{reference_doc}
+{reference_docs_str}
 '''
     selected_modules = select_reasoning_modules(task_description, reasoning_modules)
     adapted_modules = adapt_reasoning_modules(selected_modules, task_instance)
