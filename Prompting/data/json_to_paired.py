@@ -41,9 +41,9 @@ def process_finance_pairs(pairs_filename, reference_data, output_filename):
     output_df.to_csv(output_filename, index=False)
 
 def main():
-    reference_filename = 'Prompting/data/reference_docs/tech_reference.csv'
-    pairs_filename = '/Users/dishankj/Documents/696ds-long-form-style-transfer/pairwise_data/tech.pairs.csv'
-    output_filename = '/Users/dishankj/Documents/696ds-long-form-style-transfer/Prompting/data/paired_docs/tech_paired.csv'
+    reference_filename = 'Prompting/data/reference_docs/entertainment_reference.csv'
+    pairs_filename = '/Users/dishankj/Documents/696ds-long-form-style-transfer/pairwise_data/entertainment.pairs.200.csv'
+    output_filename = '/Users/dishankj/Documents/696ds-long-form-style-transfer/Prompting/data/paired_docs/entertainment_paired.csv'
 
     reference_data = read_finance_reference(reference_filename)
     process_finance_pairs(pairs_filename, reference_data, output_filename)
