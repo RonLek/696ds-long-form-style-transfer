@@ -9,7 +9,17 @@ client = OpenAI()
 OPENROUTER_API_KEY = os.environ["OPENROUTER_API_KEY"]
 
 def run_few_shot(source_doc, reference_docs, publication_name):
-    reference_docs_str = "\n\n".join(reference_docs)
+    reference_docs_str = ""
+    skipped_docs = []
+    for doc in reference_docs:
+        if isinstance(doc, str):
+            reference_docs_str += doc + "\n\n"
+        else:
+            skipped_docs.append(doc)
+    
+    if skipped_docs:
+        print(f"Skipped {len(skipped_docs)} document(s) due to non-string type in few-shot prompting.")
+
     # response = client.chat.completions.create(
     #     model="gpt-4-turbo-preview",
     #     messages=[
@@ -43,7 +53,7 @@ def run_few_shot(source_doc, reference_docs, publication_name):
                 {
                     "role": "user",
                     "content": f"SOURCE:\n{source_doc}\n\nREFERENCE DOCUMENTS:\n{reference_docs_str}"
-                    #TODO : experiment with paired docs also
+
                 }
             ]
         })

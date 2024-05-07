@@ -78,4 +78,3 @@ def query_openai(prompt, temperature=0.1):
             return content
         except Exception as e:
             print("Failure querying the AI. Retrying...")
-            time.sleep(1)

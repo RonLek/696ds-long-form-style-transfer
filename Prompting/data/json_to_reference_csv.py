@@ -25,12 +25,12 @@ def write_to_csv(data, filename):
 
 def main():
     json_data = []
-    with open('/Users/dishankj/Documents/696ds-long-form-style-transfer/pairwise_data/entertainment.pair_pages.200.jsonl', 'r') as file:
+    with open('/Users/dishankj/Documents/696ds-long-form-style-transfer/Prompting/data/reference_docs/merged.jsonl', 'r') as file:
         for line in file:
             json_data.append(json.loads(line))
 
     processed_data = process_json_data(json_data)
-    write_to_csv(processed_data, 'Prompting/data/reference_docs/entertainment_reference.csv')
+    write_to_csv(processed_data, 'Prompting/data/reference_docs/merged_ref.csv')
 
 if __name__ == '__main__':
     main()
