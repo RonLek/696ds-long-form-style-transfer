@@ -3,6 +3,7 @@ import torch
 from torch.nn import functional as F
 from evaluate import load
 import csv
+import pandas as pd
 
 def bertscorer(target_text, output_text):
     if not len(target_text) or not len(output_text):
@@ -81,7 +82,7 @@ def attribute_scorer(tokenizer, model, attribute_index, target_text, output_text
 #    print(avg_output_score)
 #    print(avg_target_score)
 
-    return (avg_output_score - avg_target_score) / avg_target_score
+    return abs(avg_output_score - avg_target_score) / avg_target_score
 
 
 formality_tokenizer = AutoTokenizer.from_pretrained("s-nlp/roberta-base-formality-ranker", max_length=512)
@@ -90,24 +91,67 @@ simplicity_tokenizer = AutoTokenizer.from_pretrained("google-bert/bert-large-unc
 simplicity_model = AutoModelForSequenceClassification.from_pretrained('/work/pi_dhruveshpate_umass_edu/project_7/classifiers/subset_simplicity_outputs_bert_large_uncased/checkpoint-7030')
 bertscore = load("bertscore")
 publication_tokenizer = LongformerTokenizerFast.from_pretrained('allenai/longformer-base-4096', max_length=1024)
-publication_model = LongformerForSequenceClassification.from_pretrained('/work/pi_dhruveshpate_umass_edu/project_7/classifiers/tech/longformer-finetuned-tech', num_labels = 6)
-publication_list = ['cnet', 'engadget', 'wired', 'techcrunch', 'theverge', 'arstechnica']
-
-for prompt_index, prompt in enumerate(['zero_shot', 'few_shot']):
-    output_data =[['normalized_formality', 'normalized_simplicity', 'bertscore_precision', 'bertscore_recall', 'bertscore_f1'] + publication_list]
-    with open('../outputs/output_tech.csv', 'r') as f_outputs:
+domain_dicts = [
+        {
+            'domain': 'tech',
+            'pub_list': ['cnet', 'engadget', 'wired', 'techcrunch', 'theverge', 'arstechnica'],
+        },
+        {
+            'domain': 'entertainment',
+            'pub_list': ['buzzfeed', 'variety', 'people', 'tmz', 'ew', 'eonline'],
+        },
+        {
+            'domain': 'games',
+            'pub_list': ['ign', 'polygon', 'kotaku'],
+        },
+        {
+            'domain': 'food',
+            'pub_list': ['timeout', 'eater', 'theinfatuation', 'thrillist'],
+        },
+        {
+            'domain': 'finance',
+            'pub_list': ['investopedia', 'fool', 'nerdwallet'],
+        }
+    ]
+print(domain_dicts)
+dataset_benchmark = pd.read_csv('../data/dataset.csv')
+for prompt_index, prompt in enumerate(['zero_shot', 'few_shot', 'self_discover_absolute']):
+    output_data =[['normalized_formality', 'normalized_simplicity', 'bertscore_precision', 'bertscore_recall', 'bertscore_f1', 'source_probability', 'target_probability']]
+    with open('../outputs/outputs_benchmark_dataset.csv', 'r') as f_outputs:
         reader_obj = csv.reader(f_outputs, quotechar='"', quoting=csv.QUOTE_MINIMAL)
         line = next(reader_obj)
-        for _ in range(5): # only need 50 pairs per domain
+        for pair_index in range(100): # 100 pairs, 20 per domain
             line = next(reader_obj)
-            formality_score = attribute_scorer(formality_tokenizer, formality_model, 1, line[2], line[5 + prompt_index])
-            simplicity_score = attribute_scorer(simplicity_tokenizer, simplicity_model, 1, line[2], line[5 + prompt_index])
-            bscores = bertscorer(line[2], line[5 + prompt_index])
-            publication_scores = publication_scorer(line[5 + prompt_index])
-            print(formality_score, simplicity_score, bscores, publication_scores)
-            row_result = [formality_score, simplicity_score] + bscores + publication_scores
-            print(row_result)
-            output_data.append(row_result)
+            try:
+                formality_score = attribute_scorer(formality_tokenizer, formality_model, 1, line[2], line[5 + prompt_index])
+                simplicity_score = attribute_scorer(simplicity_tokenizer, simplicity_model, 1, line[2], line[5 + prompt_index])
+                bscores = bertscorer(line[1], line[5 + prompt_index])
+                
+                pub1 = dataset_benchmark.iloc[pair_index]['pub1']
+                pub2 = dataset_benchmark.iloc[pair_index]['pub2']
+                if pair_index % 20 == 0:
+                    print(pair_index // 20)
+                    print(domain_dicts[pair_index//20])
+                    domain = domain_dicts[pair_index//20]['domain']
+                    pub_list = domain_dicts[pair_index//20]['pub_list']
+                    publication_model = LongformerForSequenceClassification.from_pretrained(f'/work/pi_dhruveshpate_umass_edu/project_7/classifiers/{domain}/longformer-finetuned-{domain}', num_labels = len(pub_list))
+                publication_scores = publication_scorer(line[5 + prompt_index])
+                if pub1 in pub_list and pub2 in pub_list:
+                    publication_scores = [publication_scores[pub_list.index(pub1)], publication_scores[pub_list.index(pub2)]]
+                elif pub1 in pub_list:
+                    publication_scores = [publication_scores[pub_list.index(pub1)], 0]
+                elif pub2 in pub_list:
+                    publication_scores = [0, publication_scores[pub_list.index(pub2)]]
+                else:
+                    publication_scores = [0, 0]
+                print(formality_score, simplicity_score, bscores, publication_scores)
+                row_result = [formality_score, simplicity_score] + bscores + publication_scores
+                print(row_result)
+                output_data.append(row_result)
+            except Exception as e:
+                print(f'*** error in line {pair_index} ***')
+                print(e)
+                output_data.append([0] * 7)
     
         with open(f'{prompt}.csv', 'w') as f:
             writer = csv.writer(f)
