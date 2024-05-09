@@ -25,7 +25,15 @@ class StyleTransfer:
             self.publications_df = pd.read_csv(file_path)
             print(f"Publications CSV file selected: {file_path}")
 
-    def run_prompting(self, source_doc, publication_name, num_references=None):
+    def select_paired_dataset_csv(self):
+        root = tk.Tk()
+        root.withdraw()
+        file_path = filedialog.askopenfilename(filetypes=[("CSV Files", "*.csv")])
+        if file_path:
+            self.paired_dataset_df = pd.read_csv(file_path)
+            print(f"Paired dataset CSV file selected: {file_path}")
+
+    def run_prompting(self, source_doc, publication_name, num_references=None, use_paired_dataset=False):
         reference_doc = self.publications_df.loc[self.publications_df['Publication_name'] == publication_name, 'reference_doc'].sample(n=1).values[0]
 
         try:    
@@ -39,11 +47,22 @@ class StyleTransfer:
             # Few-shot
             few_shot_result = ""
             if num_references:
-                reference_docs = self.publications_df.loc[self.publications_df['Publication_name'] == publication_name, 'reference_doc'].sample(n=num_references).tolist()
-                few_shot_result = perform_few_shot(source_doc, reference_docs, publication_name)
+                if use_paired_dataset:
+                    paired_docs = []
+                    paired_dataset_filtered = self.paired_dataset_df[
+                        (self.paired_dataset_df['publication_name_paired_doc1'] == publication_name) &
+                        (self.paired_dataset_df['paired_doc1'] != source_doc)
+                    ]
+                    for _, row in paired_dataset_filtered.sample(n=min(num_references, len(paired_dataset_filtered))).iterrows():
+                        paired_docs.append((row['paired_doc1'], row['paired_doc2']))
+                    few_shot_result = perform_few_shot(source_doc, paired_docs=paired_docs)
+                else:
+                    reference_docs = self.publications_df.loc[self.publications_df['Publication_name'] == publication_name, 'reference_doc'].sample(n=num_references).tolist()
+                    few_shot_result = perform_few_shot(source_doc, reference_docs=reference_docs, publication_name=publication_name)
         except TypeError as e:
             print(f"Encountered a type error in few-shot prompting: {e}")
             few_shot_result = ""
+
 
         # Self-discover
         reasoning_modules = [
@@ -83,8 +102,11 @@ class StyleTransfer:
             self_discover_result = ""
 
         return zero_shot_result, few_shot_result, self_discover_result
+    
 
-    def process_dataset(self, num_docs=0, num_references=None):
+
+
+    def process_dataset(self, num_docs=0, num_references=None,use_paired_dataset=False):
         if num_docs == 0:
             num_docs = len(self.paired_df)
 
@@ -100,10 +122,11 @@ class StyleTransfer:
                     print(f"Encountered an error in zero-shot prompting: {e}")
                 
                 try:
-                    few_shot_result = self.run_prompting(source_doc, publication_name, num_references)[1]
+                    few_shot_result = self.run_prompting(source_doc, publication_name, num_references, use_paired_dataset=True)[1]
                     self.save_output_csv(index, 'Fewshot_output', few_shot_result)
                 except Exception as e:
                     print(f"Encountered an error in few-shot prompting: {e}")
+
                 
                 try:
                     self_discover_result = self.run_prompting(source_doc, publication_name, num_references)[2]
@@ -117,7 +140,7 @@ class StyleTransfer:
 
 
     def save_output_csv(self, index=None, column_name=None, result=None):
-        output_file = "output(50-100).csv"
+        output_file = "output(last25).csv"
 
         if index is not None and column_name is not None and result is not None:
             if column_name not in self.paired_df.columns:
@@ -133,6 +156,7 @@ if __name__ == "__main__":
 
     style_transfer.select_paired_csv()
     style_transfer.select_publications_csv()
+    style_transfer.select_paired_dataset_csv()
 
     num_docs = int(input("Enter the number of documents to perform style transfer on (0 for all documents): "))
     num_references = int(input("Enter the number of reference documents for few-shot prompting: "))
