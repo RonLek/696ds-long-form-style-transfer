@@ -1,1 +1,2 @@
 Tensorflow and Pytorch script for training politeness classifier
+Data : https://github.com/tag-and-generate/politeness-dataset
