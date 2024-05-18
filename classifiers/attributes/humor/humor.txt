@@ -1,0 +1,2 @@
+Tensorflow and Pytorch script for training humor classifier
+Data : https://paperswithcode.com/dataset/flickrstyle10k
